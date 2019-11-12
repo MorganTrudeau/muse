@@ -1,28 +1,16 @@
 import React from 'react';
-import {View} from 'react-native';
+import {View, Image, Text} from 'react-native';
 import TrackPlayer from 'react-native-track-player';
 import MusicControls from '../components/MusicControls';
 import MusicSeekBar from '../components/MusicSeekBar';
-
-const track = {
-  id: 'unique track id',
-  url:
-    'https://p.scdn.co/mp3-preview/4808af6481b8dd5eea27c30416a16fb49e83c89b?cid=a2ab0fdc0d9b438196efafed4e56e97d.mp3', // Load media from the network
-  title: 'Avaritia',
-  artist: 'deadmau5',
-  album: 'while(1<2)',
-  genre: 'Progressive House, Electro House',
-  date: '2014-05-20T07:00:00+00:00', // RFC 3339
-
-  artwork:
-    'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/d7ae21af-7b8f-4f38-9c0c-e89de27923c9/daq33xv-2182a482-ba8b-40bf-9bf0-9e00c68906a0.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2Q3YWUyMWFmLTdiOGYtNGYzOC05YzBjLWU4OWRlMjc5MjNjOVwvZGFxMzN4di0yMTgyYTQ4Mi1iYThiLTQwYmYtOWJmMC05ZTAwYzY4OTA2YTAuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.8si4126BjCQI1KbeDuH0Hz3p3tRtYf-k92CXfi9KPzo', // Load artwork from the network
-};
+import {connect} from 'react-redux';
 
 class MusicPlayer extends React.Component {
   state = {isPlaying: false};
 
   componentDidMount() {
-    TrackPlayer.add([track]);
+    console.log(this.props.tracks);
+    TrackPlayer.add(Object.values(this.props.tracks));
   }
 
   play = () => {
@@ -48,11 +36,36 @@ class MusicPlayer extends React.Component {
   };
 
   render() {
+    const currentTrack = this.props.tracks[this.props.currentTrackId] || {};
+    console.log('CURRENT TRACK', currentTrack);
     return (
-      <View style={{width: '100%', alignItems: 'center'}}>
+      <View style={{width: '100%', alignItems: 'center', flex: 1}}>
+        <Image
+          source={{uri: currentTrack.artwork}}
+          resizeMode={'contain'}
+          style={{height: undefined, width: '100%', flex: 1}}
+        />
+        <Text
+          style={{
+            fontSize: 22,
+            fontWeight: 'bold',
+            color: '#fff',
+            alignSelf: 'flex-start',
+          }}>
+          {currentTrack.title}
+        </Text>
+        <Text
+          style={{
+            fontSize: 20,
+            opacity: 0.5,
+            color: '#fff',
+            alignSelf: 'flex-start',
+          }}>
+          {currentTrack.artist}
+        </Text>
         <MusicSeekBar onSeek={this.seekTo} />
         <MusicControls
-          isPlaying={this.state.isPlaying}
+          trackPlayerState={this.props.trackPlayerState}
           play={this.play}
           pause={this.pause}
           skipNext={this.skipNext}
@@ -64,4 +77,12 @@ class MusicPlayer extends React.Component {
   }
 }
 
-export default MusicPlayer;
+const mapState = state => {
+  return {
+    trackPlayerState: state.trackPlayer.state,
+    tracks: state.music.tracks,
+    currentTrackId: state.trackPlayer.currentTrack,
+  };
+};
+
+export default connect(mapState)(MusicPlayer);

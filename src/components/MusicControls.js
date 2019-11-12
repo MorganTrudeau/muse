@@ -2,19 +2,21 @@ import React from 'react';
 import {View} from 'react-native';
 import Icon from '../components/Icon';
 import global, {colors} from '../styles';
+import {State} from 'react-native-track-player';
 
 const MusicControls = ({
-  isPlaying,
+  trackPlayerState,
   play,
   pause,
   skipPrevious,
   skipNext,
   style,
 }) => {
-  const playPauseIcon = isPlaying
-    ? require('../assets/img/pause.png')
-    : require('../assets/img/play.png');
-  const playPauseAction = isPlaying ? pause : play;
+  const playPauseIcon =
+    trackPlayerState === State.Playing
+      ? require('../assets/img/pause.png')
+      : require('../assets/img/play.png');
+  const playPauseAction = trackPlayerState === State.Playing ? pause : play;
   return (
     <View style={[global.row, style]}>
       <Icon
