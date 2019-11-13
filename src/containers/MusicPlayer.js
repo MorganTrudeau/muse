@@ -1,17 +1,14 @@
 import React from 'react';
-import {View, Image, Text} from 'react-native';
 import TrackPlayer from 'react-native-track-player';
-import MusicControls from '../components/MusicControls';
-import MusicSeekBar from '../components/MusicSeekBar';
 import {connect} from 'react-redux';
+import * as TrackActions from '../actions/trackPlayer';
+import MusicPlayerModal from '../components/MusicPlayerModal';
+import MusicPlayerBar from '../components/MusicPlayerBar';
 
-class MusicPlayer extends React.Component {
-  state = {isPlaying: false};
+type Props = {componentType: 'modal' | 'bar'};
 
-  componentDidMount() {
-    console.log(this.props.tracks);
-    TrackPlayer.add(Object.values(this.props.tracks));
-  }
+class MusicPlayer extends React.Component<Props> {
+  state = {isPlaying: false, modalVisible: false};
 
   play = () => {
     this.setState({isPlaying: true});
@@ -35,44 +32,31 @@ class MusicPlayer extends React.Component {
     TrackPlayer.skipToPrevious();
   };
 
+  closeModal = () => this.setState({modalVisible: false});
+  openModal = () => this.setState({modalVisible: true});
+
   render() {
-    const currentTrack = this.props.tracks[this.props.currentTrackId] || {};
-    console.log('CURRENT TRACK', currentTrack);
+    const currentTrack = this.props.tracks[this.props.currentTrackId];
+
+    const musicPlayerProps = {
+      currentTrack,
+      trackPlayerState: this.props.trackPlayerState,
+      play: this.play,
+      pause: this.pause,
+      seekTo: this.seekTo,
+      skipNext: this.skipNext,
+      skipPrevious: this.skipPrevious,
+    };
+
     return (
-      <View style={{width: '100%', alignItems: 'center', flex: 1}}>
-        <Image
-          source={{uri: currentTrack.artwork}}
-          resizeMode={'contain'}
-          style={{height: undefined, width: '100%', flex: 1}}
+      <React.Fragment>
+        <MusicPlayerBar {...musicPlayerProps} openModal={this.openModal} />
+        <MusicPlayerModal
+          {...musicPlayerProps}
+          visible={this.state.modalVisible}
+          onRequestClose={this.closeModal}
         />
-        <Text
-          style={{
-            fontSize: 22,
-            fontWeight: 'bold',
-            color: '#fff',
-            alignSelf: 'flex-start',
-          }}>
-          {currentTrack.title}
-        </Text>
-        <Text
-          style={{
-            fontSize: 20,
-            opacity: 0.5,
-            color: '#fff',
-            alignSelf: 'flex-start',
-          }}>
-          {currentTrack.artist}
-        </Text>
-        <MusicSeekBar onSeek={this.seekTo} />
-        <MusicControls
-          trackPlayerState={this.props.trackPlayerState}
-          play={this.play}
-          pause={this.pause}
-          skipNext={this.skipNext}
-          skipPrevious={this.skipPrevious}
-          style={{marginTop: 15}}
-        />
-      </View>
+      </React.Fragment>
     );
   }
 }
@@ -85,4 +69,13 @@ const mapState = state => {
   };
 };
 
-export default connect(mapState)(MusicPlayer);
+const mapDispatch = dispatch => {
+  return {
+    updateTrack: id => dispatch(TrackActions.trackChanged(id)),
+  };
+};
+
+export default connect(
+  mapState,
+  mapDispatch,
+)(MusicPlayer);

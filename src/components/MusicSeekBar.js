@@ -2,7 +2,7 @@ import React from 'react';
 import Slider from '@react-native-community/slider';
 import {useProgress} from 'react-native-track-player/lib/hooks';
 
-const MusicSeekBar = ({onSeek, width = '100%', height = 80}) => {
+const MusicSeekBar = ({onSeek, width = '100%', height = 80, disabled}) => {
   const {position, bufferedPosition, duration} = useProgress();
   console.log('POSITION', position);
   return (

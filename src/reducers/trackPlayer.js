@@ -4,6 +4,7 @@ const initialState = {
   state: null,
   currentTrack: null,
   nextTrack: null,
+  modalVisible: false,
 };
 
 export const trackPlayer = (state = initialState, action) => {
